@@ -42,7 +42,7 @@ solana-keygen grind --starts-with Budi:1 --ignore-case
 
 ## Syarat
 
-- **Node.js 18 atau lebih baru** (diuji di Node 20). Tidak ada dependensi runtime.
+- **Node.js 18 atau lebih baru** (diuji di Node 20). CLI tidak memiliki dependensi runtime; aplikasi Android/PWA memakai Capacitor.
 - CPU. Grinding itu brute-force, tidak ada jalan pintas.
 
 ```bash
@@ -151,10 +151,10 @@ Namamu mengandung `0`, `O`, `I`, atau `l`. Contoh:
 
 Ganti sesuai saran, misalnya `--starts-with Rizalo:1`.
 
-### Tidak perlu `npm install`
+### CLI tidak perlu `npm install`
 
-Script utamanya tidak punya dependensi. `npm install` hanya diperlukan kalau mau
-menjalankan test (`test.mjs` / `test-e2e.mjs`).
+Untuk grinding CLI, Node.js saja cukup dan tidak ada dependensi runtime. `npm ci`
+diperlukan untuk test dan untuk membangun aplikasi Android/PWA (Capacitor).
 
 ## Cara pakai
 
@@ -402,9 +402,10 @@ Dua detail implementasi yang sengaja dibuat begitu:
 ## Test
 
 ```bash
-npm install          # hanya untuk devDependencies test (bs58, tweetnacl)
-node test.mjs        # test inti, deterministik, ~1 detik
-node test-e2e.mjs    # test end-to-end, menjalankan CLI sungguhan
+npm ci
+npm test             # test inti CLI
+npm run test:app     # WebCrypto/TweetNaCl app dibandingkan dengan node:crypto
+npm run test:e2e     # test end-to-end, menjalankan CLI sungguhan
 ```
 
 **Test inti** (`test.mjs`) membandingkan encoder base58 internal dengan library
@@ -446,3 +447,35 @@ solana-vanity/
   diklaim ~820k key/detik di Apple Silicon) atau
   [ziglana/grincel.gpu](https://github.com/ziglana/grincel.gpu). Angka itu klaim
   penulisnya, belum saya verifikasi sendiri.
+
+---
+
+## Aplikasi Android: VanitySol
+
+Repo ini juga menyediakan aplikasi Android/PWA berbahasa Indonesia. PWA bisa dipasang dari Chrome Android; project native Capacitor dan workflow GitHub Actions membangun AAB/APK untuk pengujian atau distribusi. APK tidak meminta izin internet. Estimasi dan kecepatan di ponsel bergantung perangkat serta kondisi panas/baterai.
+
+Untuk menyiapkan aset web dan menyinkronkannya ke Android:
+
+```bash
+npm ci
+npm run android:sync
+```
+
+Untuk mencoba versi web lokal:
+
+```bash
+npm run preview:app
+```
+
+Buka tautan HTTPS Live Preview dari Arena di Chrome Android untuk memasangnya sebagai PWA. Untuk build native lokal diperlukan JDK dan Android SDK:
+
+```bash
+cd android
+./gradlew assembleDebug
+```
+
+Build Play Store harus memakai upload keystore milikmu sendiri. CI menghasilkan artifact bertanda debug bila signing secrets belum tersedia; artifact debug **tidak dapat dipublikasikan**. Jangan pernah commit keystore atau file JSON hasil grinder.
+
+- Panduan Android dan CI: [docs/ANDROID.md](docs/ANDROID.md)
+- Checklist listing dan signing Play Store: [docs/PLAY-STORE.md](docs/PLAY-STORE.md)
+- Kebijakan privasi: [PRIVACY.md](PRIVACY.md)

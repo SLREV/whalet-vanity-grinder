@@ -1,0 +1,26 @@
+# Node / test outputs
+node_modules/
+.test-out/
+.e2e-out/
+vanity-keys/
+npm-debug.log*
+
+# Android Studio / Gradle artifacts
+.gradle/
+**/build/
+local.properties
+*.apk
+*.aab
+*.ap_
+*.jks
+*.keystore
+android/keystore.properties
+android/app/upload-key.jks
+
+# Local secrets and IDE files
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store

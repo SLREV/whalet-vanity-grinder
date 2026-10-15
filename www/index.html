@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+    />
+    <meta name="theme-color" content="#0b1220" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Buat alamat Solana berawalan pilihanmu. Kunci dibuat lokal dan tidak dikirim ke mana pun."
+    />
+    <title>VanitySol — alamat Solana pakai namamu</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <div class="brand">
+          <img src="icons/icon-96.png" alt="" width="34" height="34" class="brand-icon" />
+          <div>
+            <h1>VanitySol</h1>
+            <p class="tagline">Alamat Solana yang diawali namamu</p>
+          </div>
+        </div>
+        <div class="badges">
+          <span class="badge ok" id="badge-offline" title="Kunci dibuat secara lokal di perangkat">LOKAL</span>
+          <span class="badge" id="badge-engine">mesin: —</span>
+        </div>
+      </header>
+
+      <main>
+        <!-- ============ TARGET ============ -->
+        <section class="card">
+          <h2>1. Prefix yang dicari</h2>
+
+          <label class="field">
+            <span class="label">Diawali dengan</span>
+            <input
+              id="prefix"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              maxlength="12"
+              placeholder="contoh: Budi"
+              value="Bu"
+            />
+          </label>
+          <p class="hint" id="prefix-hint">
+            Hanya karakter base58. Huruf <code>0 O I l</code> tidak ada di alamat Solana.
+          </p>
+          <button class="link-btn" id="fix-btn" hidden></button>
+
+          <div class="row">
+            <label class="switch">
+              <input type="checkbox" id="ignore-case" checked />
+              <span class="track"><span class="thumb"></span></span>
+              <span class="switch-text">Abaikan besar/kecil huruf <em>(sangat disarankan)</em></span>
+            </label>
+          </div>
+
+          <div class="field">
+            <span class="label">Jumlah alamat yang dicari</span>
+            <div class="chips" id="count-chips">
+              <button class="chip" data-count="1">1</button>
+              <button class="chip active" data-count="3">3</button>
+              <button class="chip" data-count="5">5</button>
+              <button class="chip" data-count="10">10</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label">Jumlah proses paralel</span>
+            <div class="chips" id="thread-chips"></div>
+          </div>
+        </section>
+
+        <!-- ============ ESTIMASI ============ -->
+        <section class="card">
+          <h2>2. Perkiraan waktu</h2>
+          <div class="estimate">
+            <div class="est-row">
+              <span>Tingkat kesulitan</span>
+              <strong id="est-level">—</strong>
+            </div>
+            <div class="est-row">
+              <span>Rata-rata percobaan</span>
+              <strong id="est-attempts">—</strong>
+            </div>
+            <div class="est-row">
+              <span>Kecepatan perangkatmu</span>
+              <strong id="est-rate">belum diukur</strong>
+            </div>
+            <div class="est-row big">
+              <span>Perkiraan waktu (per alamat)</span>
+              <strong id="est-time">—</strong>
+            </div>
+          </div>
+          <button class="ghost" id="bench-btn">Ukur kecepatan perangkat</button>
+          <p class="hint" id="est-note">
+            Ukur dulu supaya tidak menebak-nebak. Grinding itu brute-force: tidak ada jalan pintas.
+          </p>
+        </section>
+
+        <!-- ============ KONTROL ============ -->
+        <section class="card control-card">
+          <button class="primary" id="start-btn">MULAI CARI</button>
+          <div class="progress" aria-hidden="true"><div class="bar" id="bar"></div></div>
+          <div class="stats">
+            <div class="stat">
+              <span class="k">Dicoba</span><span class="v" id="stat-checked">0</span>
+            </div>
+            <div class="stat">
+              <span class="k">Kecepatan</span><span class="v" id="stat-rate">0/detik</span>
+            </div>
+            <div class="stat">
+              <span class="k">Waktu</span><span class="v" id="stat-time">0d</span>
+            </div>
+            <div class="stat">
+              <span class="k">Ketemu</span><span class="v" id="stat-found">0/0</span>
+            </div>
+          </div>
+          <p class="hint" id="run-note">
+            Layar tetap menyala selama pencarian. Proses ini memakai CPU terus-menerus.
+          </p>
+        </section>
+
+        <!-- ============ HASIL ============ -->
+        <section class="card">
+          <div class="card-head">
+            <h2>3. Hasil</h2>
+            <button class="link-btn" id="clear-results" hidden>Bersihkan</button>
+          </div>
+          <p class="empty" id="no-results">Belum ada hasil. Mulai pencarian di atas.</p>
+          <div id="results"></div>
+          <button class="ghost" id="save-all" hidden>Simpan semua ke perangkat</button>
+        </section>
+
+        <!-- ============ KEAMANAN ============ -->
+        <section class="card warn">
+          <h2>Keamanan</h2>
+          <ul class="tight">
+            <li>
+              <strong>Kunci dibuat lokal.</strong> APK tidak memiliki izin internet; versi web
+              hanya mengambil aset aplikasi saat pertama dibuka. Pencarian tidak mengirim private key
+              ke mana pun.
+            </li>
+            <li>
+              <strong>File hasil berisi private key.</strong> Siapa pun yang punya file itu bisa
+              menguras isi wallet. Jangan diunggah, jangan dibagikan.
+            </li>
+            <li>
+              Hasil <em>tidak</em> disimpan otomatis. Riwayat hanya ada selama aplikasi terbuka,
+              kecuali kamu menekan “Simpan”.
+            </li>
+            <li>
+              Keypair dibuat <em>tanpa</em> seed phrase, sama seperti
+              <code>solana-keygen grind</code>. Untuk pemulihan lewat seed phrase pakai Solana CLI.
+            </li>
+          </ul>
+        </section>
+
+        <footer class="foot">
+          <span id="build-info">VanitySol</span> ·
+          <button class="link-btn" id="about-btn">Tentang &amp; cara pakai</button>
+        </footer>
+      </main>
+    </div>
+
+    <!-- ============ MODAL TENTANG ============ -->
+    <div class="modal" id="about" hidden>
+      <div class="sheet">
+        <h2>Tentang VanitySol</h2>
+        <div class="sheet-body">
+          <h3>Cara pakai hasilnya</h3>
+          <p>
+            File <code>&lt;ALAMAT&gt;.json</code> berisi 64 angka (32 byte secret + 32 byte public),
+            format yang sama persis dengan keluaran <code>solana-keygen</code>.
+          </p>
+          <pre>solana config set --keypair ./vanity-keys/&lt;ALAMAT&gt;.json
+solana balance</pre>
+          <h3>Kenapa lama?</h3>
+          <p>
+            Rata-rata percobaan = <code>58^panjang prefix</code>, dibagi
+            <code>2^jumlah huruf</code> kalau “abaikan besar/kecil huruf” aktif. Tiap tambahan satu
+            karakter membuat pencarian 58× lebih lama.
+          </p>
+          <h3>Tips</h3>
+          <ul class="tight">
+            <li>Pakai 3–4 huruf pertama namamu saja, bukan nama penuh.</li>
+            <li>Selalu aktifkan “abaikan besar/kecil huruf” (sampai 16× lebih cepat).</li>
+            <li>Colokkan charger: pencarian memakai CPU terus-menerus.</li>
+          </ul>
+          <h3>Privasi</h3>
+          <p>
+            Tidak ada iklan, analytics, atau pengiriman data. APK tidak meminta izin internet.
+            Versi web mengambil aset statis untuk pembukaan awal; setelah terpasang, pencarian
+            berjalan lokal di perangkat. File private key hanya dibuat jika kamu menekan “Simpan”.
+          </p>
+          <h3>Lisensi pihak ketiga</h3>
+          <p>
+            Mesin cadangan memakai TweetNaCl (public domain). Teks lisensi disertakan dalam
+            <a href="licenses/THIRD-PARTY-NOTICES.txt">daftar dan teks lisensi pihak ketiga</a>.
+            Perilaku dan format keluaran mengikuti dokumentasi resmi Solana
+            (<code>solana-keygen grind</code>).
+          </p>
+          <p><a href="privacy.html">Baca kebijakan privasi lengkap</a>.</p>
+        </div>
+        <button class="primary" id="about-close">Tutup</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script src="js/core/base58.js"></script>
+    <script src="js/core/grinder-core.js"></script>
+    <script src="build-info.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

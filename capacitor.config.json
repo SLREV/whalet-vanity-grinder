@@ -1,0 +1,9 @@
+{
+  "appId": "com.vanitysol.app",
+  "appName": "VanitySol",
+  "webDir": "www",
+  "backgroundColor": "#0b1220",
+  "android": {
+    "allowMixedContent": false
+  }
+}

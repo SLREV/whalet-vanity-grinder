@@ -1,0 +1,13 @@
+VanitySol - pemberitahuan perangkat lunak pihak ketiga
+
+Versi lisensi di bawah mengikuti package-lock.json pada build ini.
+Setiap berkas berisi teks lisensi asli paket terkait.
+
+@capacitor/core 8.5.3 (MIT): capacitor-core-LICENSE.txt
+@capacitor/android 8.5.3 (MIT): capacitor-android-LICENSE.txt
+@capacitor/filesystem 8.1.4 (MIT): capacitor-filesystem-LICENSE.txt
+@capacitor/share 8.0.3 (MIT): capacitor-share-LICENSE.txt
+@capacitor/haptics 8.0.2 (MIT): capacitor-haptics-LICENSE.txt
+@capacitor/status-bar 8.0.4 (MIT): capacitor-status-bar-LICENSE.txt
+@capacitor/synapse 1.0.4 (ISC): capacitor-synapse-LICENSE.txt
+tweetnacl 1.0.3 (Unlicense): tweetnacl-LICENSE.txt
