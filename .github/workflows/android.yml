@@ -1,0 +1,107 @@
+name: Android build
+
+on:
+  push:
+    branches: [main, 'arena/**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build AAB and APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Verify CLI and app logic
+        run: npm run test:all
+
+      - name: Build web assets and sync Capacitor
+        run: npm run android:sync
+
+      - name: Set Android version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            VERSION_NAME="${GITHUB_REF_NAME#v}"
+          else
+            VERSION_NAME="$(node -p "require('./package.json').version")"
+          fi
+          echo "VERSION_CODE=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          echo "VERSION_NAME=$VERSION_NAME" >> "$GITHUB_ENV"
+
+      - name: Configure release signing key
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [[ -z "$KEYSTORE_BASE64$KEYSTORE_PASSWORD$KEY_ALIAS$KEY_PASSWORD" ]]; then
+            echo "Signing secrets absent; Gradle will create a debug-signed test artifact."
+            exit 0
+          fi
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [[ -z "${!name}" ]]; then
+              echo "A signing secret is missing: $name" >&2
+              exit 1
+            fi
+          done
+          mkdir -p android/app
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-key.jks
+          cat > android/keystore.properties <<EOF
+          storeFile=app/upload-key.jks
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+          echo "Release keystore configured."
+
+      - name: Build signed release (or debug-signed test output)
+        working-directory: android
+        run: ./gradlew --no-daemon bundleRelease assembleRelease -PVERSION_CODE="$VERSION_CODE" -PVERSION_NAME="$VERSION_NAME"
+
+      - name: Explain signing status
+        shell: bash
+        run: |
+          if [[ -f android/keystore.properties ]]; then
+            echo 'AAB/APK ditandatangani dengan keystore upload yang disediakan.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'AAB/APK menggunakan debug key. Ini hanya untuk pengujian; tidak dapat diunggah ke Play Store.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload AAB and APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: VanitySol-Android-${{ github.run_number }}
+          path: |
+            android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14

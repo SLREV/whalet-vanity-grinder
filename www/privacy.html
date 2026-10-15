@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1220" />
+    <title>Kebijakan Privasi — VanitySol</title>
+    <style>
+      :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #0b1220; color: #e8eefc; }
+      body { max-width: 760px; margin: 0 auto; padding: 28px 18px 56px; line-height: 1.65; }
+      h1, h2 { color: #19f2a8; line-height: 1.25; }
+      h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); }
+      a { color: #29d3ff; }
+      li { margin: .45rem 0; }
+      .muted { color: #93a4c8; }
+      .warning { border-left: 4px solid #ff6b8a; padding: 12px 16px; background: #241b2e; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="muted">Terakhir diperbarui: 15 Oktober 2026</p>
+      <h1>Kebijakan Privasi VanitySol</h1>
+      <p>VanitySol membuat pasangan kunci Ed25519 untuk alamat Solana. Kebijakan ini menjelaskan data yang diproses aplikasi Android dan versi web/PWA.</p>
+
+      <h2>Data yang dikumpulkan</h2>
+      <p>Kami tidak mengumpulkan, menyimpan di server, menjual, atau membagikan data pribadi. Aplikasi tidak menggunakan akun, iklan, analytics, pelacak, atau SDK pelaporan crash. Pencarian, pengukuran kecepatan, dan pembuatan private key dilakukan di perangkat.</p>
+      <p>APK native tidak meminta izin <code>INTERNET</code> dan tidak membuat koneksi jaringan. Versi web/PWA mengunduh file aplikasi statis saat kunjungan pertama; service worker menyimpan aset dari origin yang sama agar aplikasi dapat dibuka kembali tanpa koneksi. Prefix, hasil pencarian, seed, dan private key tidak dikirim ke server.</p>
+
+      <h2>Private key dan file hasil</h2>
+      <p>Hasil pencarian hanya berada di memori selama aplikasi berjalan dan tidak disimpan otomatis. Jika pengguna memilih <strong>Simpan</strong>, aplikasi menulis file JSON berisi 64 angka ke folder <code>Documents/vanity-keys</code> di perangkat. 32 angka pertama adalah secret key; siapa pun yang mendapatkan file tersebut dapat mengendalikan aset terkait. Pengguna bertanggung jawab menjaga, mencadangkan, dan menghapus file itu.</p>
+      <p>Tombol <strong>Bagikan</strong> hanya membagikan alamat publik. Sistem Android dan aplikasi lain yang dipilih pengguna memiliki kebijakan privasi masing-masing. Jangan pernah mengirim file JSON private key melalui chat, email, atau layanan berbagi.</p>
+      <p class="warning"><strong>Peringatan:</strong> file keypair JSON adalah rahasia wallet. Siapa pun yang mendapatkannya dapat mengendalikan aset. Simpan dengan aman dan jangan unggah ke layanan publik.</p>
+
+      <h2>Izin perangkat</h2>
+      <ul>
+        <li>Akses penyimpanan hanya digunakan ketika pengguna secara eksplisit menyimpan file hasil. Pada Android 10 dan versi lebih lama, Android dapat meminta izin penyimpanan untuk menulis ke Documents.</li>
+        <li>Getaran dipakai sebagai umpan balik opsional melalui fitur haptics perangkat.</li>
+        <li>Aplikasi tidak meminta akses lokasi, kontak, kamera, mikrofon, atau daftar akun.</li>
+      </ul>
+
+      <h2>Anak-anak, retensi, dan perubahan</h2>
+      <p>Aplikasi tidak meminta atau mengumpulkan informasi dari anak-anak maupun pengguna lain. Hasil yang belum diekspor hilang saat aplikasi ditutup atau dibersihkan; file yang diekspor tetap ada sampai pengguna menghapusnya. Jika praktik aplikasi atau kebijakan ini berubah, dokumen ini akan diperbarui sebelum versi terkait dirilis.</p>
+
+      <h2>Kontak</h2>
+      <p>Pertanyaan atau permintaan terkait privasi dapat disampaikan melalui issue repositori: <a href="https://github.com/SLREV/whalet-vanity-grinder/issues">GitHub Issues VanitySol</a>.</p>
+    </main>
+  </body>
+</html>

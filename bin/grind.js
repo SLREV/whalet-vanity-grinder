@@ -300,9 +300,17 @@ async function main() {
 
   function finish(code) {
     for (const w of workers) {
-      if (w) {
-        w._intentional = true;
-        w.terminate();
+      if (!w || w._done) continue;
+      w._intentional = true;
+      w._done = true;
+      // `w` adalah wrapper, bukan Worker asli: fungsi penghentinya ada di
+      // `w.kill` (t.terminate() untuk worker thread, atau stopper mode aman).
+      if (typeof w.kill === 'function') {
+        try {
+          w.kill();
+        } catch {
+          /* sudah mati, tidak masalah */
+        }
       }
     }
     if (!opts.quiet) process.stderr.write('\n');
